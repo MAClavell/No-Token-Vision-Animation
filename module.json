@@ -4,9 +4,9 @@
 	"description": "Adds an option to hard disable Token Vision Animation when moving a token. Also adds an option to disable it for clients only when the GM drags a token.",
 	"author": "MAClavell",
 	"version": "1.0.0",
-	"minimumCoreVersion": "0.7.8",
-	"compatibleCoreVersion": "0.7.8",
-	"scripts": [
+	"minimumCoreVersion": "0.7.9",
+	"compatibleCoreVersion": "0.7.9",
+	"esmodules": [
 		"no-token-vision-animation.js"
 	],
 	"languages": [
