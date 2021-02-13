@@ -42,6 +42,11 @@ Hooks.once('ready', function () {
     // Register the wrapper for Token._onMovementFrame
     // This wrapper sets the config to actually disable the vision animation
 	libWrapper.register(MODULE_ID, 'Token.prototype._onMovementFrame', function (wrapped, ...args) {
+        // Early return for performance
+        if(args[2].alreadyModified) {
+            return wrapped(...args);
+        }
+
         let disableSetting = game.settings.get(MODULE_ID, SETTING_NAME);
 
         // Disable if the vision animation if we need too
@@ -52,6 +57,9 @@ Hooks.once('ready', function () {
         else if(disableSetting == "disableGM") {
             args[2].animate = args[2].animate && (game.user.isGM || !this.isGmUpdate);
         }
+
+        // Make sure we skip over this "not really performant" code for the rest of the movement animation
+        args[2].alreadyModified = true;
 
 		// Call the original function
 		return wrapped(...args);
