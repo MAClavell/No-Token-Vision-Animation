@@ -26,8 +26,8 @@ Hooks.once('ready', function () {
     // Register to the 'preUpdateToken' hook
     // Adds a 'isGmUpdate' property to the 'options' object, to be used later
     // (the 'token' reference here is just a copy, not the actual Token)
-    Hooks.on('preUpdateToken', (parent, token, diff, options, user_id) => {
-        options.isGmUpdate = game.users.entities.filter(u => u.isGM && u.id === user_id).length > 0;
+    Hooks.on('preUpdateToken', (token, diff, options, user_id) => {
+        options.isGmUpdate = game.users.contents.filter(u => u.isGM && u.id === user_id).length > 0;
     });
 
     // Register the wrapper for Token._onUpdate
