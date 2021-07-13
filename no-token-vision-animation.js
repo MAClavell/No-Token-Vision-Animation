@@ -9,6 +9,11 @@ Hooks.once('ready', function () {
     const SETTING_NAME = "disable_animation";
     console.log(`Initializing "${MODULE_NAME}"`);
 
+    const SETTING_FOUNDRY = 0;
+    const SETTING_DISABLEALL = 1;
+    const SETTING_DISABLEGM = 2;
+    let disableSetting = 0;
+
     game.settings.register(MODULE_ID, SETTING_NAME, {
         name: game.i18n.localize("NTVA.SettingName"),
         hint: game.i18n.localize("NTVA.SettingHint"),
@@ -23,18 +28,29 @@ Hooks.once('ready', function () {
         config: true,
     });
 
-    // Register to the 'preUpdateToken' hook
+    // Register to the 'preUpdateToken' hook. Runs on the sender's computer
     // Adds a 'isGmUpdate' property to the 'options' object, to be used later
-    // (the 'token' reference here is just a copy, not the actual Token)
     Hooks.on('preUpdateToken', (token, diff, options, user_id) => {
         options.isGmUpdate = game.users.contents.filter(u => u.isGM && u.id === user_id).length > 0;
     });
 
-    // Register the wrapper for Token._onUpdate
+    // Register the wrapper for Token._onUpdate. Runs on the sender's and reciever's computer
     // This adds the 'isGmUpdate' field to the token so it can be used later
     libWrapper.register(MODULE_ID, 'Token.prototype._onUpdate', function (wrapped, ...args) {
         // args[1] is the 'options' parameter
         this.isGmUpdate = args[1].isGmUpdate;
+
+        // Set the disabled setting variable now so we don't do it for every frame in _onMovementFrame
+        let disableSettingString = game.settings.get(MODULE_ID, SETTING_NAME);
+        if(disableSettingString == "disableAll") {
+            disableSetting = SETTING_DISABLEALL;
+        }
+        else if(disableSettingString == "disableGM") {
+            disableSetting = SETTING_DISABLEGM;
+        }
+        else {
+            disableSetting = SETTING_FOUNDRY;
+        }
 
         return wrapped(...args);
     }, 'WRAPPER');
@@ -47,18 +63,16 @@ Hooks.once('ready', function () {
             return wrapped(...args);
         }
 
-        let disableSetting = game.settings.get(MODULE_ID, SETTING_NAME);
-
         // Disable if the vision animation if we need too
         // args[2] is the 'config' parameter
-        if(disableSetting == "disableAll") {
+        if(disableSetting == SETTING_DISABLEALL) {
             args[2].animate = false;
         }
-        else if(disableSetting == "disableGM") {
+        else if(disableSetting == SETTING_DISABLEGM) {
             args[2].animate = args[2].animate && (game.user.isGM || !this.isGmUpdate);
         }
 
-        // Make sure we skip over this "not really performant" code for the rest of the movement animation
+        // Make sure we skip over this code for the rest of the movement animation
         args[2].alreadyModified = true;
 
 		// Call the original function

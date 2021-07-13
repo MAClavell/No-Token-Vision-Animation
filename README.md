@@ -12,4 +12,4 @@ Example:
 ## Installation
 Works best with the [LibWrapper module](https://github.com/ruipin/fvtt-lib-wrapper) installed.
 
-Install by inputting this manifest link into the module installer: https://raw.githubusercontent.com/maclavell/no-token-vision-animation/master/module.json
+Install from the Foundry module installer or by inputting this manifest link in "Manifest URL" field: https://raw.githubusercontent.com/maclavell/no-token-vision-animation/master/module.json
