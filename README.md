@@ -13,3 +13,6 @@ Example:
 Works best with the [LibWrapper module](https://github.com/ruipin/fvtt-lib-wrapper) installed.
 
 Install from the Foundry module installer or by inputting this manifest link in "Manifest URL" field: https://raw.githubusercontent.com/maclavell/no-token-vision-animation/master/module.json
+
+### Issues
+Report any issues on the "Issues" page on this github or message me in the [FoundryVTT Discord](https://discord.gg/foundryvtt) at Joms#1636.
