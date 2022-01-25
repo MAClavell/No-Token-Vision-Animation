@@ -14,6 +14,18 @@ Hooks.once('ready', function () {
     const SETTING_DISABLEGM = 2;
     let disableSetting = 0;
 
+    function parseSetting(value) {
+        if(value == "disableAll") {
+            disableSetting = SETTING_DISABLEALL;
+        }
+        else if(value == "disableGM") {
+            disableSetting = SETTING_DISABLEGM;
+        }
+        else {
+            disableSetting = SETTING_FOUNDRY;
+        }
+    }
+
     game.settings.register(MODULE_ID, SETTING_NAME, {
         name: game.i18n.localize("NTVA.SettingName"),
         hint: game.i18n.localize("NTVA.SettingHint"),
@@ -26,7 +38,12 @@ Hooks.once('ready', function () {
         },
         default: "foundry",
         config: true,
+        onChange: value => {
+            parseSetting(value);
+        }
     });
+
+    parseSetting(game.settings.get(MODULE_ID, SETTING_NAME));
 
     // Register to the 'preUpdateToken' hook. Runs on the sender's computer
     // Adds a 'isGmUpdate' property to the 'options' object, to be used later
@@ -39,18 +56,6 @@ Hooks.once('ready', function () {
     libWrapper.register(MODULE_ID, 'Token.prototype._onUpdate', function (wrapped, ...args) {
         // args[1] is the 'options' parameter
         this.isGmUpdate = args[1].isGmUpdate;
-
-        // Set the disabled setting variable now so we don't do it for every frame in _onMovementFrame
-        let disableSettingString = game.settings.get(MODULE_ID, SETTING_NAME);
-        if(disableSettingString == "disableAll") {
-            disableSetting = SETTING_DISABLEALL;
-        }
-        else if(disableSettingString == "disableGM") {
-            disableSetting = SETTING_DISABLEGM;
-        }
-        else {
-            disableSetting = SETTING_FOUNDRY;
-        }
 
         return wrapped(...args);
     }, 'WRAPPER');
