@@ -15,10 +15,10 @@ Hooks.once('ready', function () {
     let disableSetting = 0;
 
     function parseSetting(value) {
-        if(value == "disableAll") {
+        if (value == "disableAll") {
             disableSetting = SETTING_DISABLEALL;
         }
-        else if(value == "disableGM") {
+        else if (value == "disableGM") {
             disableSetting = SETTING_DISABLEGM;
         }
         else {
@@ -45,43 +45,41 @@ Hooks.once('ready', function () {
 
     parseSetting(game.settings.get(MODULE_ID, SETTING_NAME));
 
-    // Register to the 'preUpdateToken' hook. Runs on the sender's computer
-    // Adds a 'isGmUpdate' property to the 'options' object, to be used later
-    Hooks.on('preUpdateToken', (token, diff, options, user_id) => {
-        options.isGmUpdate = game.users.contents.filter(u => u.isGM && u.id === user_id).length > 0;
-    });
-
     // Register the wrapper for Token._onUpdate. Runs on the sender's and reciever's computer
-    // This adds the 'isGmUpdate' field to the token so it can be used later
-    libWrapper.register(MODULE_ID, 'Token.prototype._onUpdate', function (wrapped, ...args) {
-        // args[1] is the 'options' parameter
-        this.isGmUpdate = args[1].isGmUpdate;
+    // This disables vision animation for the whole update
+    libWrapper.register(MODULE_ID, 'Token.prototype._onUpdate', (function() {
+        return async function(wrapped, ...args) {
+            
+            let userId = args[2];
+            let isGmUpdate = game.users.contents.filter(u => u.isGM && u.id === userId).length > 0;
+            let disableAnimation = false;
 
-        return wrapped(...args);
-    }, 'WRAPPER');
+            // Only run for tokens the client has vision for
+            if(this._isVisionSource())
+            {
+                let animationSetting = game.settings.get("core", "visionAnimation");
+                if (animationSetting) {
+                    if (disableSetting == SETTING_DISABLEALL) {
+                        disableAnimation = true;
+                    }
+                    else if (disableSetting == SETTING_DISABLEGM) {
+                        disableAnimation = animationSetting && (!game.user.isGM & isGmUpdate);
+                    }
+                }
+            }
 
-    // Register the wrapper for Token._onMovementFrame
-    // This wrapper sets the config to actually disable the vision animation
-	libWrapper.register(MODULE_ID, 'Token.prototype._onMovementFrame', function (wrapped, ...args) {
-        // Early return for performance
-        if(args[2].alreadyModified) {
-            return wrapped(...args);
+            if (disableAnimation) {
+                await game.settings.set("core", "visionAnimation", false);
+            }
+
+            // Call the original function
+            let result = wrapped.apply(this, args);
+
+            if (disableAnimation) {
+                await game.settings.set("core", "visionAnimation", true);
+            }
+            
+            return result;
         }
-
-        // Disable if the vision animation if we need too
-        // args[2] is the 'config' parameter
-        if(disableSetting == SETTING_DISABLEALL) {
-            args[2].animate = false;
-        }
-        else if(disableSetting == SETTING_DISABLEGM) {
-            args[2].animate = args[2].animate && (game.user.isGM || !this.isGmUpdate);
-        }
-
-        // Make sure we skip over this code for the rest of the movement animation
-        args[2].alreadyModified = true;
-
-		// Call the original function
-		return wrapped(...args);
-	}, 'WRAPPER');
+	})(), 'WRAPPER');
 });
-

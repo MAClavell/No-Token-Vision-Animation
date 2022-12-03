@@ -1,24 +1,32 @@
 {
-	"name": "no-token-vision-animation",
-	"title": "No Token Vision Animation",
-	"description": "Adds an option to hard disable the Token Vision Animation when moving a token. Also adds an option to disable it for players when the GM drags a token.",
-	"author": "MAClavell",
-	"version": "1.3.1",
-	"minimumCoreVersion": "0.8.8",
-	"compatibleCoreVersion": "9",
-	"esmodules": [
-		"no-token-vision-animation.js"
-	],
-	"languages": [
-		{
-			"lang": "en",
-			"name": "English",
-			"path": "lang/en.json"
-		}
-	],
-	"manifest": "https://raw.githubusercontent.com/maclavell/no-token-vision-animation/main/module.json",
-	"url": "https://github.com/MAClavell/No-Token-Vision-Animation/",
-	"download": "https://github.com/MAClavell/No-Token-Vision-Animation/releases/download/1.3.1/No-Token-Vision-Animation-v1.3.1.zip",
-	"bugs": "https://github.com/MAClavell/No-Token-Vision-Animation/issues",
-	"readme": "https://raw.githubusercontent.com/MAClavell/No-Token-Vision-Animation/main/README.md"
+  "title": "No Token Vision Animation",
+  "description": "Adds an option to hard disable the Token Vision Animation when moving a token. Also adds an option to disable it for players when the GM drags a token.",
+  "version": "1.4.0",
+  "esmodules": [
+    "no-token-vision-animation.js"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json",
+      "flags": {}
+    }
+  ],
+  "manifest": "https://raw.githubusercontent.com/maclavell/no-token-vision-animation/main/module.json",
+  "url": "https://github.com/MAClavell/No-Token-Vision-Animation/",
+  "download": "https://github.com/MAClavell/No-Token-Vision-Animation/releases/download/1.4.0/No-Token-Vision-Animation-v1.4.0.zip",
+  "bugs": "https://github.com/MAClavell/No-Token-Vision-Animation/issues",
+  "readme": "https://raw.githubusercontent.com/MAClavell/No-Token-Vision-Animation/main/README.md",
+  "id": "no-token-vision-animation",
+  "authors": [
+    {
+      "name": "MAClavell",
+      "flags": {}
+    }
+  ],
+  "compatibility": {
+    "minimum": "10",
+    "verified": "10"
+  }
 }
