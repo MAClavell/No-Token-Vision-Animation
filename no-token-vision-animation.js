@@ -4,29 +4,31 @@ import {libWrapper} from './shim.js';
 
 // Initialize module
 Hooks.once('ready', function () {
-    const MODULE_NAME = "No Token Vision Animation";
-    const MODULE_ID = "no-token-vision-animation";
-    const SETTING_NAME = "disable_animation";
-    console.log(`Initializing "${MODULE_NAME}"`);
+    const NTVA_MODULE_NAME = "No Token Vision Animation";
+    const NTVA_MODULE_ID = "no-token-vision-animation";
+    const NTVA_SETTING_NAME = "disable_animation";
+    console.log(`Initializing "${NTVA_MODULE_NAME}"`);
 
-    const SETTING_FOUNDRY = 0;
-    const SETTING_DISABLEALL = 1;
-    const SETTING_DISABLEGM = 2;
+    const NTVA_SETTING_FOUNDRY = 0;
+    const NTVA_SETTING_DISABLEALL = 1;
+    const NTVA_SETTING_DISABLEGM = 2;
     let disableSetting = 0;
+
+    const NTVA_FLAG_NAME = "NTVA.disableAnimation"
 
     function parseSetting(value) {
         if (value == "disableAll") {
-            disableSetting = SETTING_DISABLEALL;
+            disableSetting = NTVA_SETTING_DISABLEALL;
         }
         else if (value == "disableGM") {
-            disableSetting = SETTING_DISABLEGM;
+            disableSetting = NTVA_SETTING_DISABLEGM;
         }
         else {
-            disableSetting = SETTING_FOUNDRY;
+            disableSetting = NTVA_SETTING_FOUNDRY;
         }
     }
 
-    game.settings.register(MODULE_ID, SETTING_NAME, {
+    game.settings.register(NTVA_MODULE_ID, NTVA_SETTING_NAME, {
         name: game.i18n.localize("NTVA.SettingName"),
         hint: game.i18n.localize("NTVA.SettingHint"),
         scope: "world",
@@ -43,42 +45,61 @@ Hooks.once('ready', function () {
         }
     });
 
-    parseSetting(game.settings.get(MODULE_ID, SETTING_NAME));
+    parseSetting(game.settings.get(NTVA_MODULE_ID, NTVA_SETTING_NAME));
 
-    // Register the wrapper for Token._onUpdate. Runs on the sender's and reciever's computer
-    // This disables vision animation for the whole update
-    libWrapper.register(MODULE_ID, 'Token.prototype._onUpdate', (function() {
+    // Register the wrapper for Token._onUpdate. Runs on the sender's computer
+    libWrapper.register(NTVA_MODULE_ID, 'Token.prototype._onUpdate', (function() {
         return async function(wrapped, ...args) {
-            
-            let userId = args[2];
-            let isGmUpdate = game.users.contents.filter(u => u.isGM && u.id === userId).length > 0;
-            let disableAnimation = false;
 
-            // Only run for tokens the client has vision for
-            if(this._isVisionSource())
-            {
-                let animationSetting = game.settings.get("core", "visionAnimation");
-                if (animationSetting) {
-                    if (disableSetting == SETTING_DISABLEALL) {
-                        disableAnimation = true;
-                    }
-                    else if (disableSetting == SETTING_DISABLEGM) {
-                        disableAnimation = animationSetting && (!game.user.isGM & isGmUpdate);
+            // Only run for the mover of the token
+            let userId = args[2];
+            if (game.user.id === userId) {
+                // Only run for tokens the client has vision for
+                if (this._isVisionSource()) {
+                    let changed = args[0];
+                    const positionChanged = ("x" in changed) || ("y" in changed);
+                    const rotationChanged = ("rotation" in changed);
+                    const sizeChanged = ("width" in changed) || ("height" in changed);
+
+                    if (positionChanged || sizeChanged || (rotationChanged && this.hasLimitedSourceAngle)) {
+                        let disableAnimation = false;
+                        if (disableSetting == NTVA_SETTING_DISABLEALL) {
+                            disableAnimation = true;
+                        }
+                        else if (disableSetting == NTVA_SETTING_DISABLEGM) {
+                            disableAnimation = game.user.isGM;
+                        }
+
+                        this.document.setFlag(NTVA_MODULE_ID, NTVA_FLAG_NAME, disableAnimation);
                     }
                 }
             }
 
-            if (disableAnimation) {
+            // Call the original function
+            return wrapped.apply(this, args);
+        }
+	})(), 'WRAPPER');
+
+    // Register the wrapper for Token._onAnimationUpdate. Runs on the sender's and reciever's computer
+    libWrapper.register(NTVA_MODULE_ID, 'Token.prototype._onAnimationUpdate', (function() {
+        return async function(wrapped, ...args) {
+
+            let disableAnimation = this.document.getFlag(NTVA_MODULE_ID, NTVA_FLAG_NAME) && !game.user.isGM;
+
+            // Check the settings value in case the vision animation setting was changed mid-animation.
+            let animationSetting = game.settings.get("core", "visionAnimation");
+
+            if (disableAnimation && animationSetting) {
                 await game.settings.set("core", "visionAnimation", false);
             }
 
             // Call the original function
             let result = wrapped.apply(this, args);
 
-            if (disableAnimation) {
+            if (disableAnimation && animationSetting) {
                 await game.settings.set("core", "visionAnimation", true);
             }
-            
+
             return result;
         }
 	})(), 'WRAPPER');
