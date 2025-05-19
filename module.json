@@ -1,7 +1,7 @@
 {
   "title": "No Token Vision Animation",
   "description": "Adds an option to hard disable the Token Vision Animation when moving a token. Also adds an option to disable it for players when the GM drags a token.",
-  "version": "1.12.0",
+  "version": "13.0.0",
   "esmodules": [
     "no-token-vision-animation.js"
   ],
@@ -15,7 +15,7 @@
   ],
   "manifest": "https://raw.githubusercontent.com/maclavell/no-token-vision-animation/main/module.json",
   "url": "https://github.com/MAClavell/No-Token-Vision-Animation/",
-  "download": "https://github.com/MAClavell/No-Token-Vision-Animation/releases/download/1.12.0/No-Token-Vision-Animation-v1.12.0.zip",
+  "download": "https://github.com/MAClavell/No-Token-Vision-Animation/releases/download/13.0.0/No-Token-Vision-Animation-v13.0.0.zip",
   "bugs": "https://github.com/MAClavell/No-Token-Vision-Animation/issues",
   "readme": "https://raw.githubusercontent.com/MAClavell/No-Token-Vision-Animation/main/README.md",
   "id": "no-token-vision-animation",
@@ -26,8 +26,8 @@
     }
   ],
   "compatibility": {
-    "minimum": "12",
-    "verified": "12"
+    "minimum": "13",
+    "verified": "13"
   },
   "relationships": {
 		"requires": [

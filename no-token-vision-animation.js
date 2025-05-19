@@ -48,7 +48,7 @@ Hooks.once('ready', function () {
     parseSetting(game.settings.get(NTVA_MODULE_ID, NTVA_SETTING_NAME));
 
     // Register the wrapper for Token._onUpdate. Runs on the sender's computer
-    libWrapper.register(NTVA_MODULE_ID, 'Token.prototype._onUpdate', (function() {
+    libWrapper.register(NTVA_MODULE_ID, 'CONFIG.Token.objectClass.prototype._onUpdate', (function() {
         return async function(wrapped, ...args) {
 
             // Only run for the mover of the token
@@ -56,12 +56,16 @@ Hooks.once('ready', function () {
             if (game.user.id === userId) {
                 // Only run for tokens the client has vision for
                 if (this._isVisionSource()) {
+                    // Mimic _onAnimationUpdate and detect if this token's vision needs to be updated
                     let changed = args[0];
                     const positionChanged = ("x" in changed) || ("y" in changed);
+                    const elevationChanged = "elevation" in changed;
                     const rotationChanged = ("rotation" in changed);
                     const sizeChanged = ("width" in changed) || ("height" in changed);
 
-                    if (positionChanged || sizeChanged || (rotationChanged && this.hasLimitedSourceAngle)) {
+                    const visionChanged = positionChanged || sizeChanged || elevationChanged || (rotationChanged && this.hasLimitedSourceAngle)
+                    
+                    if (visionChanged) {
                         let disableAnimation = false;
                         if (disableSetting == NTVA_SETTING_DISABLEALL) {
                             disableAnimation = true;
@@ -81,7 +85,7 @@ Hooks.once('ready', function () {
 	})(), 'WRAPPER');
 
     // Register the wrapper for Token._onAnimationUpdate. Runs on the sender's and reciever's computer
-    libWrapper.register(NTVA_MODULE_ID, 'Token.prototype._onAnimationUpdate', (function() {
+    libWrapper.register(NTVA_MODULE_ID, 'CONFIG.Token.objectClass.prototype._onAnimationUpdate', (function() {
         return async function(wrapped, ...args) {
 
             let disableAnimation = this.document.getFlag(NTVA_MODULE_ID, NTVA_FLAG_NAME) && !game.user.isGM;
