@@ -60,10 +60,14 @@ Hooks.once('ready', function () {
                     let changed = args[0];
                     const positionChanged = ("x" in changed) || ("y" in changed);
                     const elevationChanged = "elevation" in changed;
-                    const rotationChanged = ("rotation" in changed);
+                    const rotationChanged = "rotation" in changed;
                     const sizeChanged = ("width" in changed) || ("height" in changed);
+                    const depthChanged = "depth" in changed;
+                    const levelChanged = "level" in changed;
 
-                    const visionChanged = positionChanged || sizeChanged || elevationChanged || (rotationChanged && this.hasLimitedSourceAngle)
+                    const perspectiveChanged = positionChanged || elevationChanged || sizeChanged || depthChanged
+                        || (rotationChanged && this.hasLimitedSourceAngle) || levelChanged;
+                    const visionChanged = perspectiveChanged && this.hasSight;
                     
                     if (visionChanged) {
                         let disableAnimation = false;
